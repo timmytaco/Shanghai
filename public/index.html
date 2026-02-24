@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shanghai</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js" defer></script>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Lobby Section -->
+        <!-- UI Screens -->
+
+        <!-- 1. Welcome Screen -->
+        <div id="welcome-screen" class="screen">
+            <div class="lobby-card">
+                <h1>Shanghai</h1>
+                <p>Welcome to the digital experience.</p>
+                <div class="input-group">
+                    <input type="text" id="username-input" placeholder="Enter Username" maxlength="12" />
+                </div>
+                <div class="btn-row">
+                    <button id="btn-enter-app" class="primary-btn" disabled>Enter</button>
+                    <button id="btn-rules-welcome" class="secondary-btn">Rules</button>
+                </div>
+            </div>
+            <!-- Float Admin Button -->
+            <button
+                onclick="console.log('Admin Clicked'); document.getElementById('admin-bar').classList.toggle('hidden');"
+                style="position: fixed; top: 10px; left: 10px; z-index: 10000; background: red; color: white; padding: 10px; border: 2px solid white; font-weight: bold; cursor: pointer;">
+                ADMIN TOOLS
+            </button>
+        </div>
+
+        <!-- 2. Main Menu -->
+        <div id="main-menu" class="screen hidden">
+            <div class="lobby-card">
+                <h2>Main Menu</h2>
+                <div class="menu-options">
+                    <button id="btn-menu-create" class="primary-btn">Create Room</button>
+                    <button id="btn-menu-join-code" class="secondary-btn">Join with Code</button>
+                </div>
+                <div style="margin-top: 20px;">
+                    <span id="display-username" class="user-display"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Create Configuration -->
+        <div id="create-config-screen" class="screen hidden">
+            <div class="lobby-card">
+                <h2>Room Settings</h2>
+                <div class="input-group">
+                    <label>Max Players: <span id="config-max-val">8</span></label>
+                    <input type="range" id="config-max-input" min="2" max="24" value="8" />
+                </div>
+                <div class="input-group">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="config-public-input" checked />
+                        <span>Open to Random Joiners</span>
+                    </label>
+                </div>
+                <div class="btn-row">
+                    <button id="btn-config-cancel" class="secondary-btn">Back</button>
+                    <button id="btn-config-start" class="primary-btn">Create & Enter Lobby</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Join Code Screen -->
+        <div id="join-code-screen" class="screen hidden">
+            <div class="lobby-card">
+                <h2>Join Room</h2>
+                <div class="input-group">
+                    <input type="text" id="join-code-input" placeholder="Enter Room Code"
+                        style="text-transform:uppercase" />
+                </div>
+                <div class="btn-row">
+                    <button id="btn-join-cancel" class="secondary-btn">Back</button>
+                    <button id="btn-join-submit" class="primary-btn">Join</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Waiting Room / Lobby -->
+        <div id="lobby-screen" class="screen hidden">
+            <div class="lobby-card wide-card">
+                <div class="lobby-header">
+                    <h2 id="lobby-room-id">Room: ????</h2>
+                    <div class="host-controls" id="host-controls">
+                        <!-- Host specific toggles -->
+                        <button id="btn-toggle-open" class="toggle-btn">Room: OPEN</button>
+                    </div>
+                </div>
+
+                <div class="lobby-content">
+                    <div class="player-list-section">
+                        <h3>Players (<span id="player-count">0</span>)</h3>
+                        <div id="lobby-players" class="player-grid"></div>
+                    </div>
+
+                    <div class="chat-section">
+                        <div id="lobby-chat-messages" class="chat-box"></div>
+                        <div class="chat-input-row">
+                            <input type="text" id="lobby-chat-input" placeholder="Chat..." />
+                            <button id="btn-lobby-send">Sent</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lobby-footer">
+                    <button id="btn-leave-lobby" class="secondary-btn">Leave</button>
+                    <button id="start-game-btn" class="primary-btn hidden" disabled>Start Game</button>
+                </div>
+            </div>
+
+            <!-- Start Game Configuration Modal (Moved here logically, though absolute) -->
+            <div id="start-modal" class="modal-overlay hidden">
+                <div class="modal-content">
+                    <h3>Game Setup</h3>
+
+                    <div class="setup-section">
+                        <h4>1. Randomization</h4>
+                        <div class="radio-group">
+                            <label><input type="radio" name="shuffle-type" value="normal" checked> Normal
+                                Shuffle</label>
+                            <label><input type="radio" name="shuffle-type" value="round_robin"> Round Robin (Minimize
+                                Repeats)</label>
+                        </div>
+                    </div>
+
+                    <div class="setup-section">
+                        <h4>2. Table Configuration</h4>
+                        <p>Select how to split the players:</p>
+                        <div id="table-config-options"></div>
+                    </div>
+
+                    <div class="btn-row">
+                        <button id="cancel-start-btn" class="secondary-btn">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rules Modal -->
+        <div id="rules-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <h2>Shanghai Rules</h2>
+                <div class="rules-text">
+                    <h3>Objective</h3>
+                    <p>Be the player with the lowest score at the end of 7 rounds.</p>
+
+                    <h3>Rounds & Contracts</h3>
+                    <ul>
+                        <li>Round 1: 2 Sets</li>
+                        <li>Round 2: 1 Set, 1 Run</li>
+                        <li>Round 3: 2 Runs</li>
+                        <li>Round 4: 3 Sets</li>
+                        <li>Round 5: 2 Sets, 1 Run</li>
+                        <li>Round 6: 1 Set, 2 Runs</li>
+                        <li>Round 7: 3 Runs</li>
+                    </ul>
+
+                    <h3>Gameplay</h3>
+                    <ul>
+                        <li><strong>Sets:</strong> 3 or more cards of the same rank (e.g., 3-3-3). Suit irrelevant.
+                        </li>
+                        <li><strong>Runs:</strong> 4 or more cards of the same suit in sequence (e.g., 4♥ 5♥ 6♥ 7♥).
+                        </li>
+                        <li><strong>Buying:</strong> If you want a card dictated out of turn, you can "Buy" it. Use
+                            a Buy token (2 per round). Penalty: Take the discard + 2 cards from deck.</li>
+                        <li><strong>Jokers:</strong> Wild cards (50 points). Aces are 15, face cards 10, others 5.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Board Section -->
+    <div id="game-screen" class="screen hidden">
+        <header>
+            <div class="game-info">
+                <span id="round-display">Round 1: 2 Sets</span>
+                <span id="turn-display">Waiting for start...</span>
+            </div>
+            <div>
+                <button id="btn-music-toggle" class="secondary-sm">Music: Off</button>
+                <button id="btn-rules-game" class="rules-btn small">Rules</button>
+                <button id="leave-btn" class="secondary-btn">Leave</button>
+            </div>
+        </header>
+
+        <div class="game-layout">
+            <div class="table-surface">
+                <div class="deck-area">
+                    <div id="draw-deck" class="card deck-card">Deck</div>
+                    <div id="discard-pile" class="card-stack"></div>
+                </div>
+                <div id="opponents-area" class="opponents-circle">
+                    <!-- Opponents positioned absolutely -->
+                </div>
+                <div id="opponents-area" class="opponents-circle">
+                    <!-- Opponents positioned absolutely -->
+                </div>
+            </div>
+
+            <!-- Intermission Overlay -->
+            <div id="intermission-overlay" class="modal-overlay hidden">
+                <div class="modal-content">
+                    <h3>Round Intermission</h3>
+                    <p id="intermission-msg">Waiting for other tables...</p>
+                    <p>You can chat with the room while you wait.</p>
+                    <button id="btn-next-round" class="hidden">Start Next Round</button>
+                </div>
+            </div>
+
+            <!-- Chat Widget -->
+            <div id="chat-widget" class="chat-widget collapsed">
+                <div class="chat-header" id="chat-header">Talk to Table <span id="chat-toggle">▲</span></div>
+                <div class="chat-body">
+                    <div id="chat-messages" class="chat-messages"></div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" placeholder="Type a message..." maxlength="50">
+                        <button id="btn-send-chat">Send</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scoreboard Details -->
+            <div id="scoreboard-modal" class="modal hidden">
+                <div class="modal-content">
+                    <span class="close-modal close-scoreboard">&times;</span>
+                    <h2>Scoreboard</h2>
+                    <table id="scoreboard-table">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Total Score</th>
+                                <!-- Rounds could be added dynamically -->
+                            </tr>
+                        </thead>
+                        <tbody id="scoreboard-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Player Player (Bottom) -->
+            <div class="player-area">
+                <div class="player-controls">
+                    <!-- Actions are now context/click based -->
+                    <button id="btn-buy" disabled>Buy</button>
+                    <button id="btn-discard" disabled>Discard</button>
+                    <button id="btn-meld" disabled>Meld / Go Down</button>
+                    <span class="separator">|</span>
+                    <button id="btn-sort-rank" class="secondary-sm">Sort Rank</button>
+                    <button id="btn-sort-suit" class="secondary-sm">Sort Suit</button>
+                    <button id="btn-scoreboard" class="secondary-sm">Scores</button>
+                </div>
+                <div id="my-hand" class="hand-container">
+                    <!-- Player cards -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Opponent Melds View Modal -->
+        <div id="opponent-meld-modal" class="modal-overlay hidden">
+            <div class="modal-content wide-modal">
+                <div class="modal-header">
+                    <h2 id="opp-view-name">Player Name</h2>
+                    <span class="close-modal close-meld-view">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <h3>Melds on Table:</h3>
+                    <div id="opp-melds-container" class="melds-container">
+                        <!-- Melds go here -->
+                        <div class="empty-msg">No cards laid down yet.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    </div>
+    <!-- Buy Request Modal -->
+    <div id="buy-request-modal" class="modal hidden" style="z-index: 2000;">
+        <div class="modal-content" style="width: 400px;">
+            <h2>Buy Request</h2>
+            <p id="buy-request-text">Player X wants to buy the discard.</p>
+            <div class="card-preview" id="buy-card-preview"
+                style="display: flex; justify-content: center; margin: 10px 0;">
+                <!-- Card goes here -->
+            </div>
+            <p><strong>Allow?</strong> (If No, you MUST take it)</p>
+            <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+                <button id="btn-allow-buy" class="primary-btn" style="background: #27ae60;">Yes (Let them buy)</button>
+                <button id="btn-deny-buy" class="primary-btn" style="background: #c0392b;">No (I'll take it)</button>
+            </div>
+        </div>
+    </div>
+    <!-- Admin Nav Bar -->
+    <div id="admin-bar" class="hidden">
+        <span style="color:white; font-weight:bold; align-self:center;">Admin:</span>
+        <button onclick="showScreen('welcome')">Welcome</button>
+        <button onclick="showScreen('menu')">Menu</button>
+        <button onclick="showScreen('createConfig')">Config</button>
+        <button onclick="showScreen('lobby')">Lobby</button>
+        <button onclick="setupMockGame()">Game (Mock)</button>
+        <button onclick="document.getElementById('admin-bar').classList.add('hidden')">X</button>
+    </div>
+
+    <script>
+        // Quick Admin Toggle: Ctrl+Shift+A
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+                document.getElementById('admin-bar').classList.toggle('hidden');
+            }
+        });
+    </script>
+</body>
+
+</html>

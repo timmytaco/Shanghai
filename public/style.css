@@ -1,0 +1,628 @@
+:root {
+    --primary-color: #3498db;
+    /* IO Blue */
+    --primary-dark: #2980b9;
+    --accent-color: #e74c3c;
+    --accent-dark: #c0392b;
+    --bg-color: #1a1d2e;
+    /* Dark Deep Blue */
+    --bg-grid: rgba(255, 255, 255, 0.03);
+    --card-white: #ffffff;
+    --text-light: #ecf0f1;
+    --text-dark: #2c3e50;
+    --panel-bg: rgba(30, 40, 50, 0.85);
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    background-image:
+        linear-gradient(var(--bg-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+    background-size: 40px 40px;
+    /* Grid Pattern */
+    color: var(--text-light);
+    overflow-x: hidden;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: #34495e;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    width: 300px;
+}
+
+.config-btn {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    background: #27ae60;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.config-btn:hover {
+    background: #2ecc71;
+}
+
+/* Lobby Chat */
+#lobby-chat-container {
+    margin-top: 20px;
+    width: 300px;
+    border: 1px solid #7f8c8d;
+    border-radius: 4px;
+    background: #34495e;
+}
+
+#lobby-chat-messages {
+    height: 150px;
+    overflow-y: auto;
+    padding: 5px;
+    font-size: 0.9em;
+    text-align: left;
+}
+
+#lobby-chat-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 5px;
+    border: none;
+    border-top: 1px solid #7f8c8d;
+}
+
+.screen {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Guidance Banner */
+.guidance-banner {
+    background: rgba(41, 128, 185, 0.9);
+    color: white;
+    text-align: center;
+    padding: 10px;
+    margin: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1.1em;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.3s;
+}
+
+.guidance-banner.hidden {
+    display: none !important;
+    /* Reuse util, but explicit just in case */
+}
+
+/* Dragging Styles */
+.card.dragging {
+    opacity: 0.5;
+    transform: scale(1.05);
+    border: 2px dashed #f1c40f;
+}
+
+.discard-area.drag-over {
+    background: rgba(231, 76, 60, 0.2);
+    border: 2px dashed #e74c3c;
+    transform: scale(1.1);
+}
+
+/* Lobby Styling */
+.lobby-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    color: var(--text-dark);
+}
+
+.input-group {
+    margin-bottom: 1rem;
+}
+
+input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 200px;
+    font-size: 1rem;
+}
+
+/* IO Button Styles */
+.primary-btn,
+.config-btn,
+.action-btn {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-bottom: 4px solid var(--primary-dark);
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: transform 0.1s, border-bottom 0.1s, filter 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.primary-btn:hover,
+.config-btn:hover,
+.action-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.primary-btn:active,
+.config-btn:active,
+.action-btn:active {
+    transform: translateY(3px);
+    border-bottom-width: 0px;
+    margin-top: 3px;
+    /* visual offset */
+}
+
+.primary-btn:disabled,
+.secondary-btn:disabled,
+.action-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #7f8c8d;
+    border-bottom-color: #555;
+    transform: none;
+}
+
+/* Game Board Styling */
+#game-screen {
+    background: #1e272e;
+    /* Darker background for contrast */
+}
+
+#game-screen header {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+}
+
+.game-layout {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Circular Table Surface */
+/* Playing Surface - HUD Style */
+.table-surface {
+    width: 90vh;
+    height: 70vh;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.02);
+    /* Very subtle fill */
+    border: 2px solid rgba(52, 152, 219, 0.3);
+    /* Blue glowing border */
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.1);
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 120px;
+}
+
+/* Pulsing Turn Indicator */
+#turn-display.your-turn {
+    background-color: rgba(46, 204, 113, 0.2);
+    border: 2px solid #2ecc71;
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% {
+        box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+    }
+}
+
+.deck-area {
+    display: flex;
+    gap: 20px;
+    z-index: 5;
+}
+
+/* IO-Style Card */
+.card {
+    width: 90px;
+    height: 130px;
+    background: var(--card-white);
+    border-radius: 12px;
+    /* More rounded */
+    color: var(--text-dark);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 8px;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+    /* Chunky bottom shadow */
+    user-select: none;
+    position: relative;
+    font-weight: bold;
+    font-size: 1.4rem;
+    /* Larger text */
+    transition: transform 0.1s, margin 0.1s;
+    border: 2px solid #bdc3c7;
+    /* Light grey border */
+}
+
+/* Selected Card State - IO Style */
+.card.selected {
+    transform: translateY(-20px);
+    box-shadow: 0 0 0 4px #f1c40f;
+    /* Thick outline */
+    border-color: #f1c40f;
+    z-index: 10;
+}
+
+/* Hover Effect (only for my hand) */
+#my-hand .card:hover {
+    transform: translateY(-10px);
+    z-index: 5;
+    border-color: var(--primary-color);
+}
+
+#my-hand .card.selected:hover {
+    transform: translateY(-20px);
+}
+
+.card.red {
+    color: var(--accent-color);
+}
+
+/* Flying Card Animation */
+.flying-card {
+    position: fixed;
+    /* Fixed to viewport to move freely */
+    z-index: 1000;
+    pointer-events: none;
+    /* Don't block clicks while flying */
+    transition: all 0.6s ease-in-out;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Card Back variant for flying */
+.card-back.flying-card {
+    width: 60px;
+    height: 90px;
+    background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);
+    border: 2px solid #fff;
+    border-radius: 5px;
+}
+
+.card.black {
+    color: #2c3e50;
+}
+
+.deck-card {
+    background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+    color: white;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid white;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.deck-card:hover {
+    transform: scale(1.05);
+}
+
+/* Opponent Positioning */
+.opponents-circle {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    /* Let clicks pass through to deck */
+}
+
+.opponent {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 10px 15px;
+    border-radius: 12px;
+    text-align: center;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    pointer-events: auto;
+    width: 140px;
+    transition: all 0.5s ease;
+}
+
+/* Player Area (Hand) */
+.player-area {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 20px;
+    z-index: 50;
+    pointer-events: none;
+    /* Let clicks pass */
+}
+
+.player-controls {
+    margin-bottom: 10px;
+    pointer-events: auto;
+}
+
+.hand-container {
+    display: flex;
+    justify-content: center;
+    width: 80%;
+    max-width: 1000px;
+    height: 160px;
+    /* Force height */
+    pointer-events: auto;
+    /* Removed negative gap to rely on margin logic */
+}
+
+.hand-container .card {
+    margin-right: -55px;
+    /* Tight overlap */
+    transition: transform 0.2s, margin 0.2s;
+    cursor: pointer;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+    /* Shadow on left side mainly */
+}
+
+.hand-container .card:last-child {
+    margin-right: 0;
+}
+
+.hand-container .card:hover {
+    transform: translateY(-30px);
+    z-index: 100;
+    margin-right: -20px;
+    /* Expand space on hover */
+}
+
+.hand-container .card.selected {
+    transform: translateY(-40px);
+    border: 3px solid #f1c40f;
+    z-index: 100;
+}
+
+/* Modal Styling */
+.modal {
+    display: flex;
+    /* Hidden by class, but flex when active */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    color: var(--text-dark);
+    position: relative;
+    text-align: left;
+}
+
+.close-modal {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.close-modal:hover {
+    color: black;
+}
+
+.rules-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: white;
+    color: var(--text-dark);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.rules-btn.small {
+    position: static;
+    display: inline-block;
+    margin-right: 10px;
+    box-shadow: none;
+    border: 1px solid #ccc;
+}
+
+.rules-text ul {
+    margin-bottom: 1rem;
+    padding-left: 20px;
+}
+
+/* Chat Widget */
+.chat-widget {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 300px;
+    background: white;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    transition: height 0.3s;
+}
+
+.chat-widget.collapsed {
+    height: 40px;
+    overflow: hidden;
+}
+
+.chat-header {
+    background: var(--primary-color);
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    border-radius: 8px 8px 0 0;
+}
+
+.chat-body {
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    background: #f9f9f9;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    border-bottom: 1px solid #ddd;
+    font-size: 0.9em;
+    color: #333;
+}
+
+.chat-messages div {
+    margin-bottom: 5px;
+}
+
+.chat-input-area {
+    display: flex;
+    padding: 5px;
+}
+
+.chat-input-area input {
+    flex: 1;
+    width: auto;
+    /* Override global input width */
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.chat-input-area button {
+    margin-left: 5px;
+    padding: 5px 10px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+/* Scoreboard Table */
+#scoreboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+#scoreboard-table th,
+#scoreboard-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+#scoreboard-table th {
+    background: var(--primary-color);
+    color: white;
+}
+
+.close-scoreboard {
+    color: #333;
+}
+
+/* Secondary Buttons */
+.secondary-sm {
+    background-color: #7f8c8d;
+    color: white;
+    padding: 5px 10px !important;
+    font-size: 0.8rem !important;
+    margin: 0 2px !important;
+}
+
+.secondary-sm:hover {
+    background-color: #95a5a6;
+}
+
+.separator {
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0 5px;
+    font-size: 1.2rem;
+    vertical-align: middle;
+}
