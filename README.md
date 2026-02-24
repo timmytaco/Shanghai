@@ -1,4 +1,4 @@
-# Shanghai Rummy
+# Shanghai
 
 An online multiplayer card game implementation of Shanghai Rummy.
 
